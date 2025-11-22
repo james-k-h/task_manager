@@ -90,6 +90,7 @@ class ScriptLauncher:
             ("Coding", "coding"),
             ("Finances", "finances"),
             ("Morning Activities", "morning"),
+            ("Study", "study"),
         ]
 
         for display_name, category_key in categories:
