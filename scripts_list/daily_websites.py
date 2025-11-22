@@ -18,6 +18,6 @@ if not websites:
 # Open each website in a new tab
 for url in websites:
     webbrowser.open(url)
-    time.sleep(1)  # Brief delay between opening tabs
+    time.sleep(3)  # Brief delay between opening tabs
 
 print(f"Successfully opened {len(websites)} websites!")
