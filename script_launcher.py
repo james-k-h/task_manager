@@ -65,11 +65,11 @@ class ScriptLauncher:
         title = tk.Label(
             self.main_frame,
             text="Script Launcher",
-            font=("Arial", 20, "bold"),
+            font=("Arial", 14, "bold"),
             bg="white",
             fg="black",
         )
-        title.pack(pady=30)
+        title.pack(pady=14)
 
         # Subtitle
         subtitle = tk.Label(
@@ -79,11 +79,11 @@ class ScriptLauncher:
             bg="white",
             fg="#333333",
         )
-        subtitle.pack(pady=10)
+        subtitle.pack(pady=6)
 
         # Button frame
         button_frame = tk.Frame(self.main_frame, bg="white")
-        button_frame.pack(pady=20, padx=40, fill="both", expand=True)
+        button_frame.pack(pady=12, padx=30, fill="both", expand=True)
 
         # Navigation buttons
         categories = [
@@ -103,8 +103,8 @@ class ScriptLauncher:
                 bg="#d3d3d3",
                 fg="black",
                 font=("Arial", 14),
-                width=25,
-                height=3,
+                width=20,
+                height=2,
                 relief="raised",
                 borderwidth=2,
                 cursor="hand2",
