@@ -5,13 +5,13 @@
 $pythonPath = "C:\Users\james\AppData\Local\Programs\Python\Python310\python.exe"
 
 # Set the path to your Python script
-$scriptPath = "C:\Users\james\projects\py_scripts\script_launcher.py"
+$scriptPath = "C:\Users\james\projects\py_scripts\script_launcher\script_launcher.py"
 
 # Set the working directory (where the script should run from)
-$workDir = "C:\Users\james\projects\py_scripts"
+$workDir = "C:\Users\james\projects\py_scripts\script_launcher"
 
 # Set log file path
-$logFile = "C:\Users\james\projects\py_scripts\logs\execution_log.txt"
+$logFile = "C:\Users\james\projects\py_scripts\script_launcher\logs\execution_log.txt"
 
 # Optional: Activate virtual environment if you're using one
 # & "C:\path\to\venv\Scripts\Activate.ps1"

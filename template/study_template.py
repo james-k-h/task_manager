@@ -2,6 +2,9 @@ import subprocess
 import os
 import sys
 from dotenv import load_dotenv
+import webbrowser
+import time
+import json
 from abc import ABC, abstractmethod
 
 
@@ -58,6 +61,18 @@ class StudyEnvironment(ABC):
             print(f"Error opening File Explorer: {e}")
             return False
 
+    def open_websites(self, websites_array):
+        websites_json = os.getenv(websites_array, "[]")
+        websites = json.loads(websites_json)
+
+        try:
+            for url in websites:
+                webbrowser.open(url)
+                time.sleep(3)
+            print("All websites opened successfully")
+        except Exception as e:
+            print(f"Error opening websites: {e}")
+
     def launch(self):
         """Main method to launch the study environment"""
         study_path = self.get_study_path()
@@ -69,5 +84,6 @@ class StudyEnvironment(ABC):
         if not self.validate_path(study_path):
             sys.exit(1)
 
+        # auto-triggers vs code in rel path with check
         if not self.open_vscode(study_path):
             sys.exit(1)
