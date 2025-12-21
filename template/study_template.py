@@ -87,3 +87,21 @@ class StudyEnvironment(ABC):
         # auto-triggers vs code in rel path with check
         if not self.open_vscode(study_path):
             sys.exit(1)
+
+    def open_powershell(self, path):
+        """Open PowerShell in the specified directory"""
+        try:
+            print(f"Opening PowerShell in: {path}")
+            if sys.platform == "win32":
+                subprocess.Popen(
+                    ["powershell.exe", "-NoExit", "-Command", f'cd "{path}"']
+                )
+            elif sys.platform == "darwin":  # macOS
+                subprocess.Popen(["open", "-a", "Terminal", path])
+            else:  # Linux
+                subprocess.Popen(["gnome-terminal", "--working-directory", path])
+            print("PowerShell opened successfully!")
+            return True
+        except Exception as e:
+            print(f"Error opening PowerShell: {e}")
+            return False
