@@ -7,3 +7,11 @@
 /logs
 
 /template/__pycache__
+
+/__pycache__
+
+/scripts_list/__pycache__
+
+/scripts_list/edit_script/__pycache__
+/scripts_list/planning/__pycache__
+/scripts_list/study/__pycache__
