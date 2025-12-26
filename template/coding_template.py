@@ -8,8 +8,8 @@ import json
 from abc import ABC, abstractmethod
 
 
-class StudyEnvironment(ABC):
-    """Abstract base class for study environment setup"""
+class CodingEnvironment(ABC):
+    """Abstract base class for coding environment setup"""
 
     def __init__(self, env_file=".env"):
         """Initialize and load environment variables"""
@@ -17,8 +17,8 @@ class StudyEnvironment(ABC):
         self.vscode_path = os.getenv("VSCODE_PATH", "code")
 
     @abstractmethod
-    def get_study_path(self):
-        """Return the study path - must be implemented by subclasses"""
+    def get_coding_path(self):
+        """Return the coding path - must be implemented by subclasses"""
         pass
 
     def validate_path(self, path):
@@ -74,18 +74,18 @@ class StudyEnvironment(ABC):
             print(f"Error opening websites: {e}")
 
     def launch(self):
-        """Main method to launch the study environment"""
-        study_path = self.get_study_path()
+        """Main method to launch the coding environment"""
+        coding_path = self.get_coding_path()
 
-        if not study_path:
-            print("Error: Study path not configured")
+        if not coding_path:
+            print("Error: coding path not configured")
             sys.exit(1)
 
-        if not self.validate_path(study_path):
+        if not self.validate_path(coding_path):
             sys.exit(1)
 
         # auto-triggers vs code in rel path with check
-        if not self.open_vscode(study_path):
+        if not self.open_vscode(coding_path):
             sys.exit(1)
 
     def open_powershell(self, path):
