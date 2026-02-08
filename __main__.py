@@ -11,36 +11,181 @@ import threading
 BASE_DIR = Path(__file__).resolve().parent
 
 
+class Theme:
+    """Design system for consistent styling"""
+
+    # Colors
+    BG_PRIMARY = "#FFFFFF"
+    BG_SECONDARY = "#F8F9FA"
+    BG_HOVER = "#E9ECEF"
+
+    ACCENT_PRIMARY = "#4A90E2"
+    ACCENT_HOVER = "#357ABD"
+    ACCENT_DARK = "#2E5C8A"
+
+    TEXT_PRIMARY = "#1A1A1A"
+    TEXT_SECONDARY = "#6C757D"
+    TEXT_LIGHT = "#ADB5BD"
+
+    BORDER = "#DEE2E6"
+    SUCCESS = "#28A745"
+    ERROR = "#DC3545"
+    WARNING = "#FFC107"
+
+    # Fonts
+    FONT_TITLE = ("Segoe UI", 24, "bold")
+    FONT_SUBTITLE = ("Segoe UI", 12)
+    FONT_CATEGORY = ("Segoe UI", 16, "bold")
+    FONT_BUTTON = ("Segoe UI", 11)
+    FONT_BUTTON_LARGE = ("Segoe UI", 13)
+    FONT_STATUS = ("Segoe UI", 9)
+
+    # Spacing
+    PADDING_XL = 40
+    PADDING_L = 24
+    PADDING_M = 16
+    PADDING_S = 8
+
+    # Dimensions
+    BUTTON_HEIGHT = 56
+    BUTTON_HEIGHT_SMALL = 44
+    BORDER_RADIUS = 8
+
+
+class ModernButton(tk.Button):
+    """Custom button with hover effects and modern styling"""
+
+    def __init__(self, parent, style="primary", **kwargs):
+        # Set default styling based on style type
+        if style == "primary":
+            defaults = {
+                "bg": Theme.ACCENT_PRIMARY,
+                "fg": "white",
+                "activebackground": Theme.ACCENT_HOVER,
+                "activeforeground": "white",
+            }
+            self.hover_color = Theme.ACCENT_HOVER
+            self.normal_color = Theme.ACCENT_PRIMARY
+        elif style == "secondary":
+            defaults = {
+                "bg": Theme.BG_SECONDARY,
+                "fg": Theme.TEXT_PRIMARY,
+                "activebackground": Theme.BG_HOVER,
+                "activeforeground": Theme.TEXT_PRIMARY,
+            }
+            self.hover_color = Theme.BG_HOVER
+            self.normal_color = Theme.BG_SECONDARY
+        else:  # ghost/back button
+            defaults = {
+                "bg": Theme.BG_PRIMARY,
+                "fg": Theme.TEXT_SECONDARY,
+                "activebackground": Theme.BG_SECONDARY,
+                "activeforeground": Theme.TEXT_PRIMARY,
+            }
+            self.hover_color = Theme.BG_SECONDARY
+            self.normal_color = Theme.BG_PRIMARY
+
+        defaults.update(
+            {
+                "font": kwargs.get("font", Theme.FONT_BUTTON),
+                "relief": "flat",
+                "cursor": "hand2",
+                "bd": 0,
+                "padx": 20,
+                "pady": 12,
+            }
+        )
+
+        # Merge with provided kwargs
+        defaults.update(kwargs)
+
+        super().__init__(parent, **defaults)
+
+        # Bind hover events
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+
+    def _on_enter(self, e):
+        self.config(bg=self.hover_color)
+
+    def _on_leave(self, e):
+        self.config(bg=self.normal_color)
+
+
 class ScriptLauncher:
     def __init__(self, root):
         self.root = root
         self.root.title("Script Launcher")
-        self.root.geometry("600x600")
-        self.root.configure(bg="white")
+        self.root.geometry("700x750")
+        self.root.configure(bg=Theme.BG_PRIMARY)
+
+        # Make window non-resizable for consistent layout
+        self.root.resizable(False, False)
 
         load_dotenv()
         self.scripts = self.load_scripts()
         self.current_page = None
 
-        self.main_frame = tk.Frame(root, bg="white")
-        self.main_frame.pack(fill="both", expand=True)
+        # Main container with padding
+        container = tk.Frame(root, bg=Theme.BG_PRIMARY)
+        container.pack(fill="both", expand=True)
 
-        # Status bar
-        self.status_var = tk.StringVar(value="Ready")
-        self.status_bar = tk.Label(
-            root,
-            textvariable=self.status_var,
-            anchor="w",
-            bg="#eeeeee",
-            fg="#333333",
-            padx=10,
+        # Content area
+        self.main_frame = tk.Frame(container, bg=Theme.BG_PRIMARY)
+        self.main_frame.pack(
+            fill="both", expand=True, padx=Theme.PADDING_L, pady=Theme.PADDING_L
         )
-        self.status_bar.pack(side="bottom", fill="x")
+
+        # Status bar at bottom
+        self._create_status_bar(root)
 
         self.show_navigation()
 
-    def set_status(self, message: str):
+    def _create_status_bar(self, root):
+        """Create modern status bar"""
+        status_frame = tk.Frame(root, bg=Theme.BG_SECONDARY, height=36)
+        status_frame.pack(side="bottom", fill="x")
+        status_frame.pack_propagate(False)
+
+        self.status_var = tk.StringVar(value="Ready")
+        self.status_label = tk.Label(
+            status_frame,
+            textvariable=self.status_var,
+            anchor="w",
+            bg=Theme.BG_SECONDARY,
+            fg=Theme.TEXT_SECONDARY,
+            font=Theme.FONT_STATUS,
+            padx=Theme.PADDING_M,
+        )
+        self.status_label.pack(side="left", fill="both", expand=True)
+
+        # Status indicator dot
+        self.status_indicator = tk.Label(
+            status_frame,
+            text="●",
+            bg=Theme.BG_SECONDARY,
+            fg=Theme.SUCCESS,
+            font=("Segoe UI", 12),
+            padx=Theme.PADDING_M,
+        )
+        self.status_indicator.pack(side="right")
+
+    def set_status(self, message: str, status_type: str = "ready"):
+        """Update status bar with message and color indicator"""
+        color_map = {
+            "ready": Theme.SUCCESS,
+            "running": Theme.WARNING,
+            "error": Theme.ERROR,
+            "success": Theme.SUCCESS,
+        }
+
         self.root.after(0, lambda: self.status_var.set(message))
+        self.root.after(
+            0,
+            lambda: self.status_indicator.config(
+                fg=color_map.get(status_type, Theme.SUCCESS)
+            ),
+        )
 
     def load_scripts(self):
         try:
@@ -52,88 +197,144 @@ class ScriptLauncher:
             return {}
 
     def show_navigation(self):
-        self.set_status("Ready")
+        """Display main navigation menu"""
+        self.set_status("Ready", "ready")
 
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
-        title = tk.Label(
-            self.main_frame,
-            text="Script Launcher",
-            font=("Arial", 14, "bold"),
-            bg="white",
-        )
-        title.pack(pady=14)
+        # Header section
+        header_frame = tk.Frame(self.main_frame, bg=Theme.BG_PRIMARY)
+        header_frame.pack(fill="x", pady=(0, Theme.PADDING_XL))
 
-        button_frame = tk.Frame(self.main_frame, bg="white")
-        button_frame.pack(pady=12, padx=30, fill="both", expand=True)
+        title = tk.Label(
+            header_frame,
+            text="Script Launcher",
+            font=Theme.FONT_TITLE,
+            bg=Theme.BG_PRIMARY,
+            fg=Theme.TEXT_PRIMARY,
+        )
+        title.pack()
+
+        subtitle = tk.Label(
+            header_frame,
+            text="Select a category to get started",
+            font=Theme.FONT_SUBTITLE,
+            bg=Theme.BG_PRIMARY,
+            fg=Theme.TEXT_SECONDARY,
+        )
+        subtitle.pack(pady=(Theme.PADDING_S, 0))
+
+        # Divider
+        divider = tk.Frame(self.main_frame, bg=Theme.BORDER, height=1)
+        divider.pack(fill="x", pady=Theme.PADDING_L)
+
+        # Category buttons container
+        button_container = tk.Frame(self.main_frame, bg=Theme.BG_PRIMARY)
+        button_container.pack(fill="both", expand=True, pady=Theme.PADDING_M)
 
         categories = [
-            ("Coding", "coding"),
-            ("Finances", "finances"),
-            ("Morning Activities", "morning"),
-            ("Study", "study"),
-            ("Planning", "planning"),
+            ("💻 Coding", "coding"),
+            ("💰 Finances", "finances"),
+            ("☀️ Morning Activities", "morning"),
+            ("📚 Study", "study"),
+            ("📋 Planning", "planning"),
         ]
 
         for display_name, category_key in categories:
-            tk.Button(
-                button_frame,
+            btn = ModernButton(
+                button_container,
                 text=display_name,
+                style="secondary",
                 command=lambda cat=category_key, name=display_name: self.show_category(
                     cat, name
                 ),
-                bg="#d3d3d3",
-                font=("Arial", 14),
-                width=20,
+                font=Theme.FONT_BUTTON_LARGE,
+                width=28,
                 height=2,
-            ).pack(pady=15)
+            )
+            btn.pack(pady=Theme.PADDING_S, ipady=4)
 
     def show_category(self, category, category_name):
-        self.set_status("Ready")
+        """Display scripts for selected category"""
+        self.set_status(f"Viewing {category_name}", "ready")
 
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
-        header_frame = tk.Frame(self.main_frame, bg="white")
-        header_frame.pack(fill="x", pady=20, padx=20)
+        # Header with back button
+        header_frame = tk.Frame(self.main_frame, bg=Theme.BG_PRIMARY)
+        header_frame.pack(fill="x", pady=(0, Theme.PADDING_L))
 
-        tk.Button(
+        back_btn = ModernButton(
             header_frame,
             text="← Back",
+            style="ghost",
             command=self.show_navigation,
-            bg="#e0e0e0",
-            relief="flat",
-        ).pack(side="left")
+            font=Theme.FONT_BUTTON,
+        )
+        back_btn.pack(side="left")
 
-        tk.Label(
+        # Clean category name (remove emoji for title)
+        clean_name = (
+            category_name.split(maxsplit=1)[-1]
+            if " " in category_name
+            else category_name
+        )
+
+        title = tk.Label(
             header_frame,
-            text=category_name,
-            font=("Arial", 18, "bold"),
-            bg="white",
-        ).pack(side="left", padx=20)
+            text=clean_name,
+            font=Theme.FONT_CATEGORY,
+            bg=Theme.BG_PRIMARY,
+            fg=Theme.TEXT_PRIMARY,
+        )
+        title.pack(side="left", padx=Theme.PADDING_M)
 
-        scripts_frame = tk.Frame(self.main_frame, bg="white")
-        scripts_frame.pack(pady=10, padx=40, fill="both", expand=True)
+        # Divider
+        divider = tk.Frame(self.main_frame, bg=Theme.BORDER, height=1)
+        divider.pack(fill="x", pady=Theme.PADDING_M)
+
+        # Scripts container with scrollbar if needed
+        scripts_container = tk.Frame(self.main_frame, bg=Theme.BG_PRIMARY)
+        scripts_container.pack(fill="both", expand=True, pady=Theme.PADDING_M)
 
         category_scripts = self.scripts.get(category, [])
 
-        for script in category_scripts:
-            script_name = script.get("name")
-            module_path = script.get("module")
+        if not category_scripts:
+            empty_state = tk.Label(
+                scripts_container,
+                text="No scripts available in this category",
+                font=Theme.FONT_SUBTITLE,
+                bg=Theme.BG_PRIMARY,
+                fg=Theme.TEXT_LIGHT,
+            )
+            empty_state.pack(pady=Theme.PADDING_XL)
+            return
 
-            tk.Button(
-                scripts_frame,
+        # Script buttons
+        for script in category_scripts:
+            script_name = script.get("name", "Unnamed Script")
+            module_path = script.get("module", "")
+
+            # Script card frame
+            card_frame = tk.Frame(scripts_container, bg=Theme.BG_SECONDARY)
+            card_frame.pack(fill="x", pady=Theme.PADDING_S)
+
+            btn = ModernButton(
+                card_frame,
                 text=script_name,
+                style="secondary",
                 command=lambda n=script_name, m=module_path: self.run_script(n, m),
-                bg="#d3d3d3",
-                font=("Arial", 11),
-                width=35,
-                height=2,
-            ).pack(pady=8)
+                font=Theme.FONT_BUTTON,
+                width=50,
+                anchor="w",
+            )
+            btn.pack(fill="x", padx=2, pady=2, ipady=8)
 
     def run_script(self, script_name: str, module_path: str):
-        self.set_status(f"Launching {script_name}...")
+        """Execute script in background thread"""
+        self.set_status(f"Launching {script_name}...", "running")
         threading.Thread(
             target=self._run_script_worker,
             args=(script_name, module_path),
@@ -141,8 +342,9 @@ class ScriptLauncher:
         ).start()
 
     def _run_script_worker(self, script_name: str, module_path: str):
+        """Background worker for script execution"""
         try:
-            self.set_status("Starting script...")
+            self.set_status(f"Running {script_name}...", "running")
 
             subprocess.run(
                 [sys.executable, "-m", module_path],
@@ -153,7 +355,7 @@ class ScriptLauncher:
                 check=True,
             )
 
-            self.set_status("Done")
+            self.set_status(f"✓ {script_name} completed", "success")
 
             self.root.after(
                 0,
@@ -163,7 +365,7 @@ class ScriptLauncher:
             )
 
         except subprocess.TimeoutExpired:
-            self.set_status("Timed out")
+            self.set_status(f"✗ {script_name} timed out", "error")
             self.root.after(
                 0,
                 lambda: messagebox.showerror(
@@ -172,14 +374,14 @@ class ScriptLauncher:
             )
 
         except subprocess.CalledProcessError:
-            self.set_status("Failed")
+            self.set_status(f"✗ {script_name} failed", "error")
             self.root.after(
                 0,
                 lambda: messagebox.showerror("Failed", f"{script_name} failed"),
             )
 
         except Exception as e:
-            self.set_status("Error")
+            self.set_status(f"✗ Error in {script_name}", "error")
             self.root.after(
                 0,
                 lambda: messagebox.showerror("Error", f"{script_name} error:\n{e}"),
