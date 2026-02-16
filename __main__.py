@@ -41,15 +41,15 @@ class Theme:
     FONT_STATUS = ("Segoe UI", 9)
 
     # Spacing
-    PADDING_XL = 40
-    PADDING_L = 24
-    PADDING_M = 16
-    PADDING_S = 8
+    PADDING_XL = 34
+    PADDING_L = 18
+    PADDING_M = 12
+    PADDING_S = 6
 
     # Dimensions
-    BUTTON_HEIGHT = 56
-    BUTTON_HEIGHT_SMALL = 44
-    BORDER_RADIUS = 8
+    BUTTON_HEIGHT = 32
+    BUTTON_HEIGHT_SMALL = 22
+    BORDER_RADIUS = 6
 
 
 class ModernButton(tk.Button):
@@ -116,7 +116,7 @@ class ScriptLauncher:
     def __init__(self, root):
         self.root = root
         self.root.title("Script Launcher")
-        self.root.geometry("700x750")
+        self.root.geometry("580x700")
         self.root.configure(bg=Theme.BG_PRIMARY)
 
         # Make window non-resizable for consistent layout
